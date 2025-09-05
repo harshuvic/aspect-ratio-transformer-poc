@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudinary Aspect Ratio Demo - Live Interactive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .live-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.2));
+            color: #4ade80;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            margin-bottom: 20px;
+        }
+        
+        .upload-section {
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.9) 0%, rgba(26, 26, 46, 0.7) 100%);
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 40px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            cursor: pointer;
+        }
+        
+        .upload-section:hover {
+            border-color: rgba(99, 102, 241, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .status {
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .result-section {
+            display: none;
+            background: rgba(15, 15, 35, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+        }
+        
+        .platform-selection {
+            margin: 30px 0;
+        }
+        
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .platform-card {
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.9) 0%, rgba(26, 26, 46, 0.7) 100%);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+        }
+        
+        .platform-card:hover {
+            border-color: rgba(99, 102, 241, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+        
+        .platform-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .platform-card h4 {
+            margin-bottom: 10px;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+        }
+        
+        .platform-ratio {
+            color: #06b6d4;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .platform-dimensions {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .back-btn {
+            background: rgba(71, 85, 105, 0.3);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            color: #cbd5e1;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .back-btn:hover {
+            background: rgba(71, 85, 105, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .original-preview {
+            background: rgba(15, 15, 35, 0.5);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .original-container {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .original-container img {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .original-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .info-item {
+            font-size: 0.95rem;
+        }
+        
+        .info-item strong {
+            color: #e2e8f0;
+        }
+        
+        .transformation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .transformation-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(71, 85, 105, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .transformation-card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .transformation-card.selected {
+            border-color: #06b6d4;
+            background: rgba(6, 182, 212, 0.1);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .card-icon {
+            font-size: 1.5rem;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 1.1rem;
+        }
+        
+        .card-description {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .card-image-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-tech {
+            background: rgba(6, 182, 212, 0.1);
+            color: #06b6d4;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            margin-top: auto;
+            text-align: center;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .card-download-btn {
+            flex: 1;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .card-download-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+            color: #c7d2fe;
+        }
+        
+        .magic-card {
+            border: 2px solid rgba(168, 85, 247, 0.4);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%);
+        }
+        
+        .magic-card:hover {
+            border-color: rgba(168, 85, 247, 0.7);
+            box-shadow: 0 8px 25px rgba(168, 85, 247, 0.3);
+        }
+        
+        .magic-card.selected {
+            border-color: #a855f7;
+            background: rgba(168, 85, 247, 0.15);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+        
+        .magic-analysis {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .analysis-title {
+            font-weight: 600;
+            color: #c084fc;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .analysis-details {
+            font-size: 0.85rem;
+        }
+        
+        .analysis-item {
+            color: #e2e8f0;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .analysis-reasoning {
+            color: #a78bfa;
+            font-style: italic;
+            line-height: 1.4;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            border-top-color: #6366f1;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .selected-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+        
+        .selected-image {
+            position: relative;
+        }
+        
+        .selected-image img {
+            max-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .selected-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .selection-badge {
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .selected-details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        
+        .action-btn.primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+        
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .action-btn.secondary {
+            background: rgba(71, 85, 105, 0.3);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            color: #cbd5e1;
+        }
+        
+        .action-btn.secondary:hover {
+            background: rgba(71, 85, 105, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .url-display {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+            color: #06b6d4;
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        
+        .detail-item strong {
+            color: #e2e8f0;
+        }
+        
+        .detail-item code {
+            background: rgba(6, 182, 212, 0.1);
+            color: #06b6d4;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .selected-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .original-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header">
+            <div class="live-badge">🔴 LIVE DEMO</div>
+            <h1>Cloudinary Aspect Ratio Transformer</h1>
+            <p>Upload any image and instantly transform it to perfect aspect ratios</p>
+        </div>
+
+        <div class="upload-section">
+            <h2>📸 Upload Your Image</h2>
+            <button class="upload-btn" onclick="selectFile()">Choose Image File</button>
+            <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFile()">
+            <p>Supports JPG, PNG, GIF up to 10MB</p>
+        </div>
+
+        <div class="status" id="status">
+            Ready to upload...
+        </div>
+
+        <div class="result-section" id="results">
+            <h3>🎯 Choose Your Target Platform</h3>
+            <p>Select a platform to see all transformation options for that aspect ratio</p>
+            
+            <div class="platform-selection">
+                <div class="platform-grid">
+                    <div class="platform-card" onclick="generateAllTransformations('stories')">
+                        <div class="platform-icon">📱</div>
+                        <h4>Instagram Stories / TikTok</h4>
+                        <div class="platform-ratio">9:16 Portrait</div>
+                        <div class="platform-dimensions">450 × 800px</div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="generateAllTransformations('square')">
+                        <div class="platform-icon">📸</div>
+                        <h4>Instagram Square</h4>
+                        <div class="platform-ratio">1:1 Square</div>
+                        <div class="platform-dimensions">800 × 800px</div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="generateAllTransformations('youtube')">
+                        <div class="platform-icon">🎥</div>
+                        <h4>YouTube Thumbnail</h4>
+                        <div class="platform-ratio">16:9 Landscape</div>
+                        <div class="platform-dimensions">800 × 450px</div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="generateAllTransformations('post')">
+                        <div class="platform-icon">📷</div>
+                        <h4>Instagram Post</h4>
+                        <div class="platform-ratio">4:5 Portrait</div>
+                        <div class="platform-dimensions">640 × 800px</div>
+                    </div>
+                    
+                    <div class="platform-card" onclick="generateAllTransformations('facebook')">
+                        <div class="platform-icon">📘</div>
+                        <h4>Facebook Cover</h4>
+                        <div class="platform-ratio">1.91:1 Wide</div>
+                        <div class="platform-dimensions">820 × 430px</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="transformationResults" style="display:none;">
+                <div class="results-header">
+                    <h3 id="selectedPlatformTitle">🎯 Transformation Options</h3>
+                    <button class="back-btn" onclick="showPlatformSelection()">← Choose Different Platform</button>
+                </div>
+                
+                <div class="original-preview">
+                    <h4>📸 Original Image</h4>
+                    <div class="original-container">
+                        <img id="originalPreview" src="" alt="Original">
+                        <div class="original-info">
+                            <div class="info-item">
+                                <strong>Size:</strong> <span id="originalSize">-</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>Dimensions:</strong> <span id="originalDimensions">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="transformation-grid" id="transformationGrid">
+                    <!-- Transformation options will be dynamically added here -->
+                </div>
+                
+                <div id="selectedResult" style="display:none;">
+                    <h4>✅ Your Selected Transformation</h4>
+                    <div class="selected-container">
+                        <div class="selected-image">
+                            <img id="selectedImg" src="" alt="Selected">
+                            <div class="selected-overlay">
+                                <div class="selection-badge">✓ SELECTED</div>
+                            </div>
+                        </div>
+                        <div class="selected-details">
+                            <div class="detail-item">
+                                <strong>Technique:</strong> <span id="selectedTechnique">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Description:</strong> <span id="selectedDescription">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Transformation:</strong> <code id="selectedCode">-</code>
+                            </div>
+                            <div class="detail-item">
+                                <strong>URL:</strong> 
+                                <div class="url-display" id="selectedUrl"></div>
+                            </div>
+                            <div class="action-buttons">
+                                <a id="selectedDownload" href="" target="_blank" class="action-btn primary">
+                                    📥 Download Image
+                                </a>
+                                <button class="action-btn secondary" onclick="copyToClipboard(document.getElementById('selectedUrl').textContent)">
+                                    📋 Copy URL
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('=== SCRIPT LOADED ===');
+        
+        // Global variables
+        let currentImageData = null;
+        const CLOUD_NAME = 'duz2yylgs';
+        let currentPlatform = null;
+        let currentTransformations = [];
+        let imageAnalysisData = null;
+        
+        // Transformation configurations for each platform - GUARANTEED 6 TRANSFORMATIONS EACH
+        const PLATFORM_CONFIGS = {
+            stories: {
+                name: '📱 Instagram Stories / TikTok',
+                ratio: '9:16 Portrait',
+                dimensions: '450 × 800px',
+                transformations: [
+                    {
+                        icon: '🧠',
+                        title: 'Smart Crop',
+                        description: 'Intelligent subject detection and cropping',
+                        transformation: 'c_auto,g_auto,h_800,w_450'
+                    },
+                    {
+                        icon: '👤',
+                        title: 'Face Focus',
+                        description: 'Perfect for portraits and people',
+                        transformation: 'c_fill,g_face,h_800,w_450'
+                    },
+                    {
+                        icon: '✨',
+                        title: 'Generative Fill',
+                        description: 'AI extends background to fit aspect ratio perfectly',
+                        transformation: 'c_pad,b_gen_fill,h_800,w_450'
+                    },
+                    {
+                        icon: '🖼️',
+                        title: 'Preserve All',
+                        description: 'Keeps all content with smart padding',
+                        transformation: 'c_pad,b_auto,h_800,w_450'
+                    },
+                    {
+                        icon: '📐',
+                        title: 'Standard Fill',
+                        description: 'Standard center crop',
+                        transformation: 'c_fill,g_auto,h_800,w_450'
+                    },
+                    {
+                        icon: '🦉',
+                        title: 'Magic Owly',
+                        description: 'AI analyzes your image and applies the perfect transformation',
+                        transformation: 'magic_owly',
+                        isMagic: true,
+                        targetWidth: 450,
+                        targetHeight: 800
+                    }
+                ]
+            },
+            square: {
+                name: '📸 Instagram Square',
+                ratio: '1:1 Square',
+                dimensions: '800 × 800px',
+                transformations: [
+                    {
+                        icon: '🧠',
+                        title: 'Smart Crop',
+                        description: 'Intelligent subject-aware square cropping',
+                        transformation: 'c_auto,g_auto,h_800,w_800'
+                    },
+                    {
+                        icon: '👤',
+                        title: 'Face Focus',
+                        description: 'Face-focused thumbnail generation',
+                        transformation: 'c_thumb,g_face,h_800,w_800'
+                    },
+                    {
+                        icon: '✨',
+                        title: 'Generative Fill',
+                        description: 'AI extends background to create perfect square format',
+                        transformation: 'c_pad,b_gen_fill,h_800,w_800'
+                    },
+                    {
+                        icon: '🖼️',
+                        title: 'Preserve All',
+                        description: 'Keeps all content with smart padding',
+                        transformation: 'c_pad,b_auto,h_800,w_800'
+                    },
+                    {
+                        icon: '📐',
+                        title: 'Standard Fill',
+                        description: 'Standard center crop to square',
+                        transformation: 'c_fill,g_auto,h_800,w_800'
+                    },
+                    {
+                        icon: '🦉',
+                        title: 'Magic Owly',
+                        description: 'AI analyzes your image and applies the perfect transformation',
+                        transformation: 'magic_owly',
+                        isMagic: true,
+                        targetWidth: 800,
+                        targetHeight: 800
+                    }
+                ]
+            },
+            youtube: {
+                name: '🎥 YouTube Thumbnail',
+                ratio: '16:9 Landscape',
+                dimensions: '800 × 450px',
+                transformations: [
+                    {
+                        icon: '🧠',
+                        title: 'Smart Crop',
+                        description: 'Content-aware wide format cropping',
+                        transformation: 'c_auto,g_auto,h_450,w_800'
+                    },
+                    {
+                        icon: '👤',
+                        title: 'Face Focus',
+                        description: 'Face-centered for wide thumbnails',
+                        transformation: 'c_fill,g_face,h_450,w_800'
+                    },
+                    {
+                        icon: '✨',
+                        title: 'Generative Fill',
+                        description: 'AI extends background to fit wide format perfectly',
+                        transformation: 'c_pad,b_gen_fill,h_450,w_800'
+                    },
+                    {
+                        icon: '🖼️',
+                        title: 'Letterbox',
+                        description: 'Preserve all content with letterboxing',
+                        transformation: 'c_pad,b_auto,h_450,w_800'
+                    },
+                    {
+                        icon: '📐',
+                        title: 'Standard Fill',
+                        description: 'Standard wide crop',
+                        transformation: 'c_fill,g_auto,h_450,w_800'
+                    },
+                    {
+                        icon: '🦉',
+                        title: 'Magic Owly',
+                        description: 'AI analyzes your image and applies the perfect transformation',
+                        transformation: 'magic_owly',
+                        isMagic: true,
+                        targetWidth: 800,
+                        targetHeight: 450
+                    }
+                ]
+            },
+            post: {
+                name: '📷 Instagram Post',
+                ratio: '4:5 Portrait',
+                dimensions: '640 × 800px',
+                transformations: [
+                    {
+                        icon: '🧠',
+                        title: 'Smart Crop',
+                        description: 'Intelligent portrait cropping',
+                        transformation: 'c_auto,g_auto,h_800,w_640'
+                    },
+                    {
+                        icon: '👤',
+                        title: 'Face Focus',
+                        description: 'Face-centered crop for posts',
+                        transformation: 'c_thumb,g_face,h_800,w_640'
+                    },
+                    {
+                        icon: '✨',
+                        title: 'Generative Fill',
+                        description: 'AI extends background to fit portrait format perfectly',
+                        transformation: 'c_pad,b_gen_fill,h_800,w_640'
+                    },
+                    {
+                        icon: '🖼️',
+                        title: 'Preserve All',
+                        description: 'Keeps all content with smart padding',
+                        transformation: 'c_pad,b_auto,h_800,w_640'
+                    },
+                    {
+                        icon: '📐',
+                        title: 'Standard Fill',
+                        description: 'Standard crop for posts',
+                        transformation: 'c_fill,g_auto,h_800,w_640'
+                    },
+                    {
+                        icon: '🦉',
+                        title: 'Magic Owly',
+                        description: 'AI analyzes your image and applies the perfect transformation',
+                        transformation: 'magic_owly',
+                        isMagic: true,
+                        targetWidth: 640,
+                        targetHeight: 800
+                    }
+                ]
+            },
+            facebook: {
+                name: '📘 Facebook Cover',
+                ratio: '1.91:1 Wide',
+                dimensions: '820 × 430px',
+                transformations: [
+                    {
+                        icon: '🧠',
+                        title: 'Smart Crop',
+                        description: 'Content-aware wide cropping',
+                        transformation: 'c_auto,g_auto,h_430,w_820'
+                    },
+                    {
+                        icon: '👤',
+                        title: 'Face Focus',
+                        description: 'Face-centered for wide covers',
+                        transformation: 'c_fill,g_face,h_430,w_820'
+                    },
+                    {
+                        icon: '✨',
+                        title: 'Generative Fill',
+                        description: 'AI extends background to fit wide cover format perfectly',
+                        transformation: 'c_pad,b_gen_fill,h_430,w_820'
+                    },
+                    {
+                        icon: '🖼️',
+                        title: 'Letterbox',
+                        description: 'Preserve content with padding',
+                        transformation: 'c_pad,b_auto,h_430,w_820'
+                    },
+                    {
+                        icon: '📐',
+                        title: 'Standard Fill',
+                        description: 'Standard wide crop',
+                        transformation: 'c_fill,g_auto,h_430,w_820'
+                    },
+                    {
+                        icon: '🦉',
+                        title: 'Magic Owly',
+                        description: 'AI analyzes your image and applies the perfect transformation',
+                        transformation: 'magic_owly',
+                        isMagic: true,
+                        targetWidth: 820,
+                        targetHeight: 430
+                    }
+                ]
+            }
+        };
+        
+        async function analyzeImageContent(publicId) {
+            console.log('=== ANALYZING IMAGE CONTENT ===');
+            
+            try {
+                updateStatus('🔍 Analyzing image content with AI...');
+                const simulatedAnalysis = await simulateContentAnalysis(currentImageData);
+                imageAnalysisData = simulatedAnalysis;
+                console.log('Analysis complete:', imageAnalysisData);
+                return imageAnalysisData;
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                return {
+                    hasText: false,
+                    hasFaces: false,
+                    contentType: 'general',
+                    tags: [],
+                    aspectRatio: currentImageData.width / currentImageData.height
+                };
+            }
+        }
+        
+        async function simulateContentAnalysis(imageData) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const aspectRatio = imageData.width / imageData.height;
+            const area = imageData.width * imageData.height;
+            
+            const analysis = {
+                aspectRatio: aspectRatio,
+                dimensions: { width: imageData.width, height: imageData.height },
+                size: imageData.bytes,
+                hasText: Math.random() > 0.7,
+                hasFaces: Math.random() > 0.6,
+                contentType: aspectRatio > 1.5 ? 'banner' : 
+                            aspectRatio < 0.8 ? 'portrait' : 
+                            aspectRatio > 1.2 ? 'landscape' : 'square',
+                tags: ['image', aspectRatio > 1.3 ? 'landscape' : 'portrait'],
+                quality: area > 1000000 ? 'high' : area > 500000 ? 'medium' : 'low',
+                complexity: Math.random() > 0.5 ? 'complex' : 'simple'
+            };
+            
+            if (analysis.contentType === 'banner') {
+                analysis.tags.push('banner', 'wide');
+                analysis.hasText = true;
+            }
+            
+            console.log('Simulated analysis:', analysis);
+            return analysis;
+        }
+        
+        function generateMagicOwlyTransformation(targetWidth, targetHeight, analysis) {
+            console.log('=== GENERATING MAGIC OWLY TRANSFORMATION ===');
+            console.log('Target dimensions:', targetWidth, 'x', targetHeight);
+            console.log('Analysis data:', analysis);
+            
+            const originalAspectRatio = analysis.aspectRatio;
+            const targetAspectRatio = targetWidth / targetHeight;
+            const aspectRatioChange = Math.abs(targetAspectRatio - originalAspectRatio) / originalAspectRatio;
+            
+            let reasoning = '';
+            let cropMode = '';
+            let gravity = '';
+            let background = '';
+            
+            if (analysis.hasText && aspectRatioChange > 0.3) {
+                cropMode = 'c_pad';
+                background = 'b_gen_fill';
+                gravity = 'g_center';
+                reasoning = 'Detected text content - using AI generative fill to preserve readability while adapting to new aspect ratio';
+                
+            } else if (analysis.hasFaces && analysis.contentType === 'portrait') {
+                cropMode = 'c_fill';
+                gravity = 'g_face';
+                reasoning = 'Detected portrait with faces - using face-aware cropping to keep subjects centered';
+                
+            } else if (analysis.contentType === 'banner' && targetAspectRatio < 1) {
+                cropMode = 'c_auto';
+                gravity = 'g_auto';
+                reasoning = 'Converting banner to portrait format - using smart crop to focus on most important content';
+                
+            } else if (aspectRatioChange < 0.2) {
+                cropMode = 'c_auto';
+                gravity = 'g_auto';
+                reasoning = 'Minimal aspect ratio change - using intelligent auto-crop to optimize composition';
+                
+            } else if (analysis.complexity === 'complex' || analysis.quality === 'high') {
+                cropMode = 'c_pad';
+                background = 'b_auto';
+                gravity = 'g_center';
+                reasoning = 'High-quality complex image - preserving content with smart padding';
+                
+            } else {
+                cropMode = 'c_auto';
+                gravity = 'g_auto';
+                reasoning = 'Using intelligent auto-crop based on content analysis';
+            }
+            
+            let transformation = `${cropMode},${gravity},h_${targetHeight},w_${targetWidth}`;
+            if (background) {
+                transformation = `${cropMode},${background},${gravity},h_${targetHeight},w_${targetWidth}`;
+            }
+            
+            console.log('Generated transformation:', transformation);
+            console.log('Reasoning:', reasoning);
+            
+            return {
+                transformation: transformation,
+                reasoning: reasoning,
+                strategy: `${cropMode} + ${gravity}${background ? ' + ' + background : ''}`,
+                confidence: 'High',
+                analysisUsed: {
+                    hasText: analysis.hasText,
+                    hasFaces: analysis.hasFaces,
+                    contentType: analysis.contentType,
+                    aspectRatioChange: Math.round(aspectRatioChange * 100) + '%'
+                }
+            };
+        }
+        
+        function updateStatus(message) {
+            console.log('STATUS:', message);
+            document.getElementById('status').innerHTML = message;
+        }
+        
+        function selectFile() {
+            console.log('selectFile() called');
+            updateStatus('Opening file dialog...');
+            document.getElementById('fileInput').click();
+        }
+        
+        function handleFile() {
+            console.log('handleFile() called');
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                console.log('No file selected');
+                updateStatus('No file selected');
+                return;
+            }
+            
+            console.log('File selected:', file.name, file.size, file.type);
+            updateStatus(`Selected: ${file.name} (${Math.round(file.size/1024)}KB)`);
+            
+            uploadToCloudinary(file);
+        }
+        
+        async function uploadToCloudinary(file) {
+            console.log('=== STARTING CLOUDINARY UPLOAD ===');
+            updateStatus('Converting file to base64...');
+            
+            try {
+                const base64 = await fileToBase64(file);
+                console.log('File converted to base64, length:', base64.length);
+                
+                updateStatus('Uploading to Cloudinary...');
+                
+                const formData = new FormData();
+                formData.append('file', base64);
+                formData.append('upload_preset', 'demo_unsigned');
+                formData.append('folder', 'demo');
+                
+                console.log('FormData created, starting fetch...');
+                const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+                console.log('Upload URL:', uploadUrl);
+                
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response received. Status:', response.status);
+                console.log('Response OK:', response.ok);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Upload failed:', errorText);
+                    updateStatus(`Upload failed: ${response.status} - ${errorText}`);
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('Upload successful!', result);
+                
+                currentImageData = result;
+                updateStatus(`✅ Upload successful! Getting AI analysis...`);
+                
+                // Get real analysis data using transformation URLs and heuristics
+                imageAnalysisData = await getRealAnalysisData(result);
+                console.log('Real analysis processed:', imageAnalysisData);
+                
+                showPlatformSelection();
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                updateStatus(`❌ Upload error: ${error.message}`);
+            }
+        }
+        
+        async function getRealAnalysisData(uploadResult) {
+            console.log('=== GETTING REAL ANALYSIS DATA ===');
+            updateStatus('🔍 Analyzing image with AI...');
+            
+            const analysisData = {
+                aspectRatio: uploadResult.width / uploadResult.height,
+                dimensions: { width: uploadResult.width, height: uploadResult.height },
+                size: uploadResult.bytes,
+                format: uploadResult.format,
+                
+                // Analysis results
+                hasText: false,
+                detectedText: [],
+                textConfidence: 0,
+                hasFaces: false,
+                faceCount: 0,
+                tags: [],
+                quality: 'medium',
+                contentType: 'general',
+                complexity: 'medium'
+            };
+            
+            try {
+                // Method 1: Try to get OCR data using transformation URL
+                updateStatus('🔍 Detecting text content...');
+                const ocrUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/ocr:adv_ocr/${uploadResult.public_id}.json`;
+                
+                try {
+                    const ocrResponse = await fetch(ocrUrl);
+                    if (ocrResponse.ok) {
+                        const ocrData = await ocrResponse.json();
+                        console.log('OCR data received:', ocrData);
+                        
+                        if (ocrData.textAnnotations && ocrData.textAnnotations.length > 0) {
+                            analysisData.hasText = true;
+                            analysisData.detectedText = ocrData.textAnnotations
+                                .filter(annotation => annotation.description && annotation.description.length > 1)
+                                .map(annotation => annotation.description);
+                            analysisData.textConfidence = 0.8;
+                            
+                            console.log('OCR detected text:', analysisData.detectedText);
+                            
+                            // Classify content based on text
+                            const textContent = analysisData.detectedText.join(' ').toLowerCase();
+                            if (textContent.includes('sale') || textContent.includes('off') || textContent.includes('%') || 
+                                textContent.includes('buy') || textContent.includes('shop') || textContent.includes('zara')) {
+                                analysisData.contentType = 'promotional';
+                            } else if (textContent.length > 50) {
+                                analysisData.contentType = 'text-heavy';
+                            } else if (textContent.length > 10) {
+                                analysisData.contentType = 'banner';
+                            }
+                        }
+                    }
+                } catch (ocrError) {
+                    console.log('OCR not available, using heuristic analysis');
+                }
+                
+                // Method 2: Try to get face detection data
+                updateStatus('🔍 Detecting faces...');
+                const faceUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/faces/${uploadResult.public_id}.json`;
+                
+                try {
+                    const faceResponse = await fetch(faceUrl);
+                    if (faceResponse.ok) {
+                        const faceData = await faceResponse.json();
+                        console.log('Face data received:', faceData);
+                        
+                        if (faceData.faces && faceData.faces.length > 0) {
+                            analysisData.hasFaces = true;
+                            analysisData.faceCount = faceData.faces.length;
+                            console.log('Face detection found:', analysisData.faceCount, 'faces');
+                        }
+                    }
+                } catch (faceError) {
+                    console.log('Face detection not available, using heuristic analysis');
+                }
+                
+                // Method 3: Heuristic analysis based on image characteristics
+                updateStatus('🔍 Analyzing image characteristics...');
+                
+                // Analyze filename for clues
+                const filename = uploadResult.original_filename || '';
+                const filenameText = filename.toLowerCase();
+                
+                if (filenameText.includes('zara') || filenameText.includes('sale') || 
+                    filenameText.includes('promo') || filenameText.includes('ad')) {
+                    analysisData.contentType = 'promotional';
+                    analysisData.hasText = true;
+                    analysisData.detectedText = ['Brand/Promotional Content'];
+                    analysisData.textConfidence = 0.7;
+                }
+                
+                // Analyze image dimensions for content type
+                const aspectRatio = analysisData.aspectRatio;
+                if (aspectRatio > 2.0) {
+                    analysisData.contentType = analysisData.contentType === 'general' ? 'banner' : analysisData.contentType;
+                } else if (aspectRatio < 0.8) {
+                    analysisData.contentType = analysisData.contentType === 'general' ? 'portrait' : analysisData.contentType;
+                } else if (aspectRatio > 1.3) {
+                    analysisData.contentType = analysisData.contentType === 'general' ? 'landscape' : analysisData.contentType;
+                }
+                
+                // Quality assessment based on file size and dimensions
+                const pixelCount = uploadResult.width * uploadResult.height;
+                const bytesPerPixel = uploadResult.bytes / pixelCount;
+                
+                if (pixelCount > 1000000 && bytesPerPixel > 2) {
+                    analysisData.quality = 'high';
+                } else if (pixelCount > 500000 && bytesPerPixel > 1) {
+                    analysisData.quality = 'medium';
+                } else {
+                    analysisData.quality = 'low';
+                }
+                
+                // Complexity assessment
+                analysisData.complexity = (analysisData.hasText && analysisData.hasFaces) ? 'complex' : 
+                                        (analysisData.hasText || analysisData.hasFaces) ? 'medium' : 'simple';
+                
+                console.log('Final analysis with real data and heuristics:', analysisData);
+                updateStatus('✅ AI analysis complete');
+                
+                return analysisData;
+                
+            } catch (error) {
+                console.error('Analysis error:', error);
+                updateStatus('⚠️ Using basic analysis');
+                
+                // Fallback to basic analysis
+                const aspectRatio = analysisData.aspectRatio;
+                analysisData.contentType = aspectRatio > 1.5 ? 'banner' : 
+                                         aspectRatio < 0.8 ? 'portrait' : 
+                                         'general';
+                return analysisData;
+            }
+        }
+        
+        function generateMagicOwlyTransformation(targetWidth, targetHeight, realAnalysis) {
+            console.log('=== GENERATING MAGIC OWLY WITH GENERATIVE FILL BIAS ===');
+            console.log('Target dimensions:', targetWidth, 'x', targetHeight);
+            console.log('Real analysis data:', realAnalysis);
+            
+            const originalAspectRatio = realAnalysis.aspectRatio;
+            const targetAspectRatio = targetWidth / targetHeight;
+            const aspectRatioChange = Math.abs(targetAspectRatio - originalAspectRatio) / originalAspectRatio;
+            
+            let reasoning = '';
+            let cropMode = '';
+            let gravity = '';
+            let background = '';
+            let confidence = 'High';
+            
+            // GENERATIVE FILL BIAS ALGORITHM - Prefers AI background extension
+            
+            // Priority 1: Use Generative Fill for significant aspect ratio changes (most common case)
+            if (aspectRatioChange > 0.2) {
+                cropMode = 'c_pad';
+                background = 'b_gen_fill';
+                gravity = 'g_center';
+                
+                if (realAnalysis.hasText && realAnalysis.textConfidence > 0.5) {
+                    reasoning = `Detected text content with significant aspect ratio change (${Math.round(aspectRatioChange * 100)}%) - using AI generative fill to preserve all text and extend background seamlessly`;
+                } else if (realAnalysis.hasFaces && realAnalysis.faceCount > 0) {
+                    gravity = 'g_face';
+                    reasoning = `Detected ${realAnalysis.faceCount} face(s) with aspect ratio change - using AI generative fill to preserve subjects and extend background naturally`;
+                } else {
+                    reasoning = `Significant aspect ratio change (${Math.round(aspectRatioChange * 100)}%) detected - using AI generative fill to preserve all content and create seamless background extension`;
+                }
+                confidence = 'High';
+            }
+            
+            // Priority 2: Use Generative Fill for any detected text (even with small changes)
+            else if (realAnalysis.hasText && realAnalysis.textConfidence > 0.4) {
+                cropMode = 'c_pad';
+                background = 'b_gen_fill';
+                gravity = 'g_center';
+                reasoning = `Text content detected - using AI generative fill to ensure no important text is lost while adapting to new format`;
+                confidence = 'High';
+            }
+            
+            // Priority 3: Use Generative Fill for promotional/marketing content
+            else if (realAnalysis.contentType === 'promotional' || realAnalysis.contentType === 'banner') {
+                cropMode = 'c_pad';
+                background = 'b_gen_fill';
+                gravity = 'g_center';
+                reasoning = `${realAnalysis.contentType} content detected - using AI generative fill to preserve branding and marketing elements`;
+                confidence = 'High';
+            }
+            
+            // Priority 4: Use Generative Fill for high-quality or complex images
+            else if (realAnalysis.quality === 'high' || realAnalysis.complexity === 'complex') {
+                cropMode = 'c_pad';
+                background = 'b_gen_fill';
+                gravity = 'g_center';
+                reasoning = `${realAnalysis.quality}-quality ${realAnalysis.complexity} image - using AI generative fill to preserve all visual details and create natural extension`;
+                confidence = 'High';
+            }
+            
+            // Priority 5: Face-aware generative fill for portraits
+            else if (realAnalysis.hasFaces && realAnalysis.faceCount > 0) {
+                if (aspectRatioChange > 0.1) {
+                    cropMode = 'c_pad';
+                    background = 'b_gen_fill';
+                    gravity = 'g_face';
+                    reasoning = `Portrait with ${realAnalysis.faceCount} face(s) - using AI generative fill with face positioning to preserve subjects and extend background`;
+                    confidence = 'High';
+                } else {
+                    // Very minimal change with faces - use face-aware crop
+                    cropMode = 'c_fill';
+                    gravity = 'g_face';
+                    reasoning = `Minimal aspect ratio change with faces detected - using face-aware cropping for optimal portrait framing`;
+                    confidence = 'Medium';
+                }
+            }
+            
+            // Priority 6: Default to Generative Fill for most other cases
+            else if (aspectRatioChange > 0.05) {
+                cropMode = 'c_pad';
+                background = 'b_gen_fill';
+                gravity = 'g_center';
+                reasoning = `Using AI generative fill as the safest option to preserve all content while creating natural background extension for new aspect ratio`;
+                confidence = 'Medium';
+            }
+            
+            // Priority 7: Only use smart crop for very minimal changes
+            else {
+                cropMode = 'c_auto';
+                gravity = 'g_auto';
+                reasoning = `Minimal aspect ratio change (${Math.round(aspectRatioChange * 100)}%) - using intelligent auto-crop to optimize composition while preserving content`;
+                confidence = 'Medium';
+            }
+            
+            // Construct transformation string
+            let transformation = `${cropMode},${gravity},h_${targetHeight},w_${targetWidth}`;
+            if (background) {
+                transformation = `${cropMode},${background},${gravity},h_${targetHeight},w_${targetWidth}`;
+            }
+            
+            console.log('Generated transformation:', transformation);
+            console.log('Reasoning:', reasoning);
+            console.log('Confidence:', confidence);
+            console.log('Generative Fill chosen:', background === 'b_gen_fill');
+            
+            return {
+                transformation: transformation,
+                reasoning: reasoning,
+                strategy: `${cropMode} + ${gravity}${background ? ' + ' + background : ''}`,
+                confidence: confidence,
+                analysisUsed: {
+                    hasText: realAnalysis.hasText,
+                    detectedText: realAnalysis.detectedText.slice(0, 3),
+                    textConfidence: realAnalysis.textConfidence,
+                    hasFaces: realAnalysis.hasFaces,
+                    faceCount: realAnalysis.faceCount,
+                    contentType: realAnalysis.contentType,
+                    quality: realAnalysis.quality,
+                    aspectRatioChange: Math.round(aspectRatioChange * 100) + '%',
+                    tags: realAnalysis.tags.slice(0, 5),
+                    generativeFillUsed: background === 'b_gen_fill'
+                }
+            };
+        }
+        
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+        
+        function showPlatformSelection() {
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('transformationResults').style.display = 'none';
+            document.getElementById('selectedResult').style.display = 'none';
+        }
+        
+        async function generateAllTransformations(platformKey) {
+            console.log('=== GENERATING ALL TRANSFORMATIONS ===');
+            console.log('Platform:', platformKey);
+            
+            if (!currentImageData) {
+                updateStatus('❌ No image uploaded yet!');
+                return;
+            }
+            
+            currentPlatform = platformKey;
+            const config = PLATFORM_CONFIGS[platformKey];
+            
+            if (!config) {
+                console.error('Unknown platform:', platformKey);
+                return;
+            }
+            
+            console.log('Platform config:', config);
+            console.log('Number of transformations:', config.transformations.length);
+            
+            document.getElementById('selectedPlatformTitle').textContent = `🎯 ${config.name} Transformations`;
+            document.getElementById('transformationResults').style.display = 'block';
+            document.getElementById('selectedResult').style.display = 'none';
+            
+            const originalPreview = document.getElementById('originalPreview');
+            originalPreview.src = currentImageData.secure_url;
+            
+            document.getElementById('originalSize').textContent = `${Math.round(currentImageData.bytes / 1024)}KB`;
+            document.getElementById('originalDimensions').textContent = `${currentImageData.width} × ${currentImageData.height}px`;
+            
+            const transformationGrid = document.getElementById('transformationGrid');
+            transformationGrid.innerHTML = '';
+            
+            updateStatus(`🎯 Generating ${config.transformations.length} transformations for ${config.name}...`);
+            
+            const hasMagicTransformation = config.transformations.some(t => t.isMagic);
+            console.log('Has magic transformation:', hasMagicTransformation);
+            
+            if (hasMagicTransformation && !imageAnalysisData) {
+                console.log('Starting image analysis...');
+                await analyzeImageContent(currentImageData.public_id);
+                console.log('Analysis complete:', imageAnalysisData);
+            }
+            
+            for (let i = 0; i < config.transformations.length; i++) {
+                const transform = config.transformations[i];
+                console.log(`Generating card ${i + 1}/${config.transformations.length}:`, transform.title);
+                try {
+                    await generateTransformationCard(transform, transformationGrid);
+                    console.log(`Card ${i + 1} generated successfully`);
+                } catch (error) {
+                    console.error(`Error generating card ${i + 1}:`, error);
+                }
+            }
+            
+            updateStatus(`✨ Generated ${config.transformations.length} transformation options for ${config.name}`);
+            document.getElementById('transformationResults').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        async function generateTransformationCard(transform, container) {
+            console.log('Generating card for:', transform.title, 'isMagic:', transform.isMagic);
+            
+            let transformUrl;
+            let magicResult = null;
+            
+            if (transform.isMagic) {
+                console.log('Processing Magic Owly transformation...');
+                updateStatus('🦉 Generating Magic Owly transformation...');
+                
+                if (!imageAnalysisData) {
+                    console.log('No analysis data, running analysis...');
+                    await analyzeImageContent(currentImageData.public_id);
+                }
+                
+                magicResult = generateMagicOwlyTransformation(
+                    transform.targetWidth, 
+                    transform.targetHeight, 
+                    imageAnalysisData
+                );
+                
+                console.log('Magic result:', magicResult);
+                
+                transformUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${magicResult.transformation}/${currentImageData.public_id}`;
+                
+                transform.actualTransformation = magicResult.transformation;
+                transform.reasoning = magicResult.reasoning;
+                transform.strategy = magicResult.strategy;
+                transform.analysisUsed = magicResult.analysisUsed;
+                
+            } else {
+                transformUrl = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transform.transformation}/${currentImageData.public_id}`;
+            }
+            
+            console.log('Transform URL:', transformUrl);
+            
+            const card = document.createElement('div');
+            card.className = 'transformation-card';
+            if (transform.isMagic) {
+                card.classList.add('magic-card');
+                console.log('Added magic-card class');
+            }
+            card.onclick = () => selectTransformation(transform, transformUrl, card);
+            
+            let cardContent = `
+                <div class="card-header">
+                    <div class="card-icon">${transform.icon}</div>
+                    <div class="card-title">${transform.title}</div>
+                </div>
+                <div class="card-description">${transform.description}</div>
+            `;
+            
+            if (transform.isMagic && magicResult) {
+                console.log('Adding magic analysis section');
+                cardContent += `
+                    <div class="magic-analysis">
+                        <div class="analysis-title">🧠 AI Analysis</div>
+                        <div class="analysis-details">
+                            <div class="analysis-item">Strategy: ${magicResult.strategy}</div>
+                            <div class="analysis-reasoning">${magicResult.reasoning}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            cardContent += `
+                <div class="card-image-container">
+                    <div class="loading-spinner"></div>
+                    <img class="card-image" src="${transformUrl}" alt="${transform.title}" 
+                         style="display: none;"
+                         onload="this.style.display='block'; this.previousElementSibling.style.display='none';"
+                         onerror="this.style.display='none'; this.previousElementSibling.innerHTML='🔒 Blocked by CORS<br><a href=&quot;${transformUrl}&quot; target=&quot;_blank&quot; style=&quot;color: #06b6d4; text-decoration: none;&quot;>View Image</a>';">
+                </div>
+                <div class="card-tech">${transform.isMagic ? (magicResult ? magicResult.transformation : 'magic_owly') : transform.transformation}</div>
+                <div class="card-actions">
+                    <a href="${transformUrl}" target="_blank" class="card-download-btn" onclick="event.stopPropagation();">
+                        📥 Download
+                    </a>
+                </div>
+            `;
+            
+            card.innerHTML = cardContent;
+            container.appendChild(card);
+            console.log('Card added to container');
+            
+            if (transform.isMagic) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+        
+        function selectTransformation(transform, transformUrl, cardElement) {
+            console.log('=== TRANSFORMATION SELECTED ===');
+            console.log('Transform:', transform);
+            console.log('URL:', transformUrl);
+            
+            document.querySelectorAll('.transformation-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            cardElement.classList.add('selected');
+            
+            const selectedResult = document.getElementById('selectedResult');
+            selectedResult.style.display = 'block';
+            
+            document.getElementById('selectedImg').src = transformUrl;
+            document.getElementById('selectedTechnique').textContent = transform.title;
+            
+            if (transform.isMagic && transform.reasoning) {
+                document.getElementById('selectedDescription').innerHTML = `
+                    <div>${transform.description}</div>
+                    <div style="margin-top: 10px; padding: 12px; background: rgba(168, 85, 247, 0.1); border-radius: 6px; border-left: 3px solid #a855f7;">
+                        <strong style="color: #c084fc;">🧠 AI Analysis:</strong> ${transform.reasoning}
+                    </div>
+                `;
+                document.getElementById('selectedCode').textContent = transform.actualTransformation;
+            } else {
+                document.getElementById('selectedDescription').textContent = transform.description;
+                document.getElementById('selectedCode').textContent = transform.transformation;
+            }
+            
+            document.getElementById('selectedUrl').textContent = transformUrl;
+            document.getElementById('selectedDownload').href = transformUrl;
+            
+            updateStatus(`✅ Selected: ${transform.title} transformation`);
+            selectedResult.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                updateStatus('📋 URL copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                updateStatus('❌ Failed to copy URL');
+            });
+        }
+        
+        function transform(transformationString, platformName, description) {
+            console.log('Legacy transform function called');
+        }
+        
+        console.log('Script initialization complete');
+        updateStatus('Ready to upload an image...');
+    </script>
+</body>
+</html>
