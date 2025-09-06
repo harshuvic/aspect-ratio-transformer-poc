@@ -502,6 +502,26 @@
             font-family: monospace;
             border: 1px solid rgba(6, 182, 212, 0.2);
         }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .error-message a {
+            color: #06b6d4;
+            text-decoration: none;
+        }
+
+        .error-message a:hover {
+            text-decoration: underline;
+        }
         
         @media (max-width: 768px) {
             .selected-container {
@@ -1418,6 +1438,11 @@
                 try {
                     await generateTransformationCard(transform, transformationGrid);
                     console.log(`Card ${i + 1} generated successfully`);
+                    
+                    // Add delay between transformations to avoid rate limiting
+                    if (i < config.transformations.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+                    }
                 } catch (error) {
                     console.error(`Error generating card ${i + 1}:`, error);
                 }
@@ -1425,6 +1450,117 @@
             
             updateStatus(`✨ Generated ${config.transformations.length} transformation options for ${config.name}`);
             document.getElementById('transformationResults').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // FIXED ERROR HANDLING FUNCTIONS
+        function handleImageLoad(img, url) {
+            console.log('✅ Image loaded successfully:', url);
+            img.style.display = 'block';
+            img.previousElementSibling.style.display = 'none';
+        }
+
+        async function handleImageError(img, url, transformation) {
+            console.error('❌ Image failed to load:', url);
+            console.error('Transformation:', transformation);
+            
+            img.style.display = 'none';
+            
+            // For intermittent loading issues, try retry with cache busting
+            const retryUrl = url + '?retry=' + Date.now();
+            console.log('Retrying with cache buster:', retryUrl);
+            
+            // Show retry attempt
+            img.previousElementSibling.innerHTML = `
+                <div class="error-message">
+                    🔄 <strong>Retrying...</strong><br>
+                    Loading failed, attempting retry
+                </div>
+            `;
+            
+            // Wait a moment then retry
+            setTimeout(() => {
+                const retryImg = new Image();
+                retryImg.onload = () => {
+                    console.log('✅ Retry successful:', retryUrl);
+                    img.src = retryUrl;
+                    img.style.display = 'block';
+                    img.previousElementSibling.style.display = 'none';
+                };
+                
+                retryImg.onerror = async () => {
+                    console.log('❌ Retry also failed, doing full diagnosis');
+                    
+                    // Now do the full error diagnosis
+                    try {
+                        const response = await fetch(url, { method: 'HEAD' });
+                        console.log('Fetch response status:', response.status);
+                        console.log('Fetch response headers:', [...response.headers.entries()]);
+                        
+                        if (response.status === 200) {
+                            img.previousElementSibling.innerHTML = `
+                                <div class="error-message">
+                                    🔧 <strong>Loading Issue</strong><br>
+                                    Transformation exists but preview failed to load<br>
+                                    <a href="${url}" target="_blank">Open Direct Link</a> • 
+                                    <button onclick="forceReload('${img.id || 'img-' + Date.now()}')" style="background:none;border:none;color:#06b6d4;cursor:pointer;text-decoration:underline;">Retry</button>
+                                </div>
+                            `;
+                        } else if (response.status === 400) {
+                            img.previousElementSibling.innerHTML = `
+                                <div class="error-message">
+                                    ⚠️ <strong>Invalid Transformation</strong><br>
+                                    Status: ${response.status} - Bad transformation parameters<br>
+                                    <small>Syntax: ${transformation}</small>
+                                </div>
+                            `;
+                        } else if (response.status === 404) {
+                            img.previousElementSibling.innerHTML = `
+                                <div class="error-message">
+                                    🔍 <strong>Image Not Found</strong><br>
+                                    Status: ${response.status} - Original image may have been deleted<br>
+                                    <a href="${url}" target="_blank">Check URL</a>
+                                </div>
+                            `;
+                        } else if (response.status === 422) {
+                            img.previousElementSibling.innerHTML = `
+                                <div class="error-message">
+                                    🚫 <strong>Transformation Unavailable</strong><br>
+                                    Status: ${response.status} - Feature may require plan upgrade<br>
+                                    <small>Feature: ${transformation.includes('b_gen_fill') ? 'Generative Fill' : transformation.includes('g_face') ? 'Face Detection' : transformation.includes('c_auto') ? 'Auto Crop' : 'Unknown'}</small>
+                                </div>
+                            `;
+                        } else {
+                            img.previousElementSibling.innerHTML = `
+                                <div class="error-message">
+                                    ❌ <strong>Cloudinary Error</strong><br>
+                                    Status: ${response.status}<br>
+                                    <a href="${url}" target="_blank">View Direct URL</a>
+                                </div>
+                            `;
+                        }
+                    } catch (fetchError) {
+                        console.error('Fetch error:', fetchError);
+                        
+                        img.previousElementSibling.innerHTML = `
+                            <div class="error-message">
+                                🌐 <strong>Network Issue</strong><br>
+                                ${fetchError.message}<br>
+                                <a href="${url}" target="_blank">Try Direct Link</a>
+                            </div>
+                        `;
+                    }
+                };
+                
+                retryImg.src = retryUrl;
+            }, 1000); // Wait 1 second before retry
+        }
+        
+        function forceReload(imgId) {
+            const img = document.getElementById(imgId);
+            if (img) {
+                const originalSrc = img.src.split('?')[0]; // Remove any existing cache busters
+                img.src = originalSrc + '?force=' + Date.now();
+            }
         }
         
         async function generateTransformationCard(transform, container) {
@@ -1495,10 +1631,12 @@
             cardContent += `
                 <div class="card-image-container">
                     <div class="loading-spinner"></div>
-                    <img class="card-image" src="${transformUrl}" alt="${transform.title}" 
+                    <img class="card-image" 
+                         src="${transformUrl}" 
+                         alt="${transform.title}" 
                          style="display: none;"
-                         onload="this.style.display='block'; this.previousElementSibling.style.display='none';"
-                         onerror="this.style.display='none'; this.previousElementSibling.innerHTML='🔒 Blocked by CORS<br><a href=&quot;${transformUrl}&quot; target=&quot;_blank&quot; style=&quot;color: #06b6d4; text-decoration: none;&quot;>View Image</a>';">
+                         onload="handleImageLoad(this, '${transformUrl}')"
+                         onerror="handleImageError(this, '${transformUrl}', '${transform.transformation}')">
                 </div>
                 <div class="card-tech">${transform.isMagic ? (magicResult ? magicResult.transformation : 'magic_owly') : transform.transformation}</div>
                 <div class="card-actions">
